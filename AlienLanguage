@@ -1,0 +1,123 @@
+import java.util.*;
+class AlienLanguage {
+
+  private static int DecodeLanguage(ArrayList<String> dictionary, String testCase){
+    // Split on every letter
+    String[] split = testCase.split("");
+    // Get the number of opening brackets, this gets the number of unkown segments
+    int numUnknown = testCase.length() - testCase.replace("(","").length();
+
+    int output = 0;
+
+
+    String[] brackets = new String[numUnknown];
+    String[] knownLetters = new String[numUnknown+1];
+    // An array containing each grouping of possible unknown letters
+    String[][] unknownLetters = new String[numUnknown][];
+
+    // Fill the arrays to prevent null values
+    Arrays.fill(knownLetters, "");
+    Arrays.fill(brackets, "");
+
+
+    boolean insideBrackets = false;
+    int counter = 0;
+
+    // Go through every letter in the test case assigning each letter
+    // To the corresponding array
+    for (String s : split){
+      if(s.equals("(")){
+        insideBrackets = true;
+      }
+      else if(s.equals(")")){
+        insideBrackets = false;
+        counter++;
+      }
+      else if(insideBrackets){
+        brackets[counter] = brackets[counter] + s;
+      }
+      else{
+        knownLetters[counter] = knownLetters[counter] + s;
+      }
+    }
+    for (int i = 0; i < counter; i++){
+      unknownLetters[i] = brackets[i].split("");
+    }
+
+    // Check every given known word
+    for (String word : dictionary){
+      int pos = 0;
+      int i = 0;
+
+      //While not at the end of the word
+      while(pos < word.length()){
+        boolean match = false;
+        // If the i'th known segment is correct
+        if(word.substring(pos, pos + knownLetters[i].length()).equals(knownLetters[i])){
+
+          // If there are no unkown letters left
+          if(pos + knownLetters[i].length() == word.length() && i >= unknownLetters.length){
+            output++;
+            break;
+          }
+          
+          // For every unkown letter
+          for (String s : unknownLetters[i]){
+            // if the letter after the known segment equals any
+            // unkownletter
+            if(word.substring(pos + knownLetters[i].length(), pos + knownLetters[i].length() + 1).equals(s)){
+
+              if(match == false){
+                match = true;
+                // Move to the next segmento f the word
+                pos = pos + knownLetters[i].length()  + 1;
+                i++;
+                // If we are at the end of the word break and increment output
+                if (pos >= word.length()){
+                  output++;
+                  break;
+                }
+                break;
+              }
+            }
+          }
+          // Break if we can't find a match for the segment
+          if(!match){
+            break;
+          }
+        }
+        else{
+          break;
+        }
+      }
+    }
+    return output;
+  }
+
+  public static void main(String[] args) {
+    Scanner scanner = new Scanner(System.in);
+
+    int wordLength = scanner.nextInt();
+    int numberOfWords = scanner.nextInt();
+    int testCases = scanner.nextInt();
+    scanner.nextLine();
+    ArrayList<String> knownWords = new ArrayList<String>();
+    ArrayList<String> casesToTry = new ArrayList<String>();
+
+    
+
+    for(int i = 0; i < numberOfWords; i++){
+      knownWords.add(scanner.nextLine());
+    }
+
+    for(int i = 0; i < testCases; i++){
+      casesToTry.add(scanner.nextLine());
+    }
+
+    for(int i = 0; i < testCases; i++){
+      System.out.println("Case #" + (i+1) + ": " + DecodeLanguage(knownWords,casesToTry.get(i)));
+    }
+
+    scanner.close();
+  }
+}
